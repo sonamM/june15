@@ -95,42 +95,19 @@ public class AmazonMainPage extends CommonPage {
 	 * @throws InterruptedException the interrupted exception
 	 */
 	public void PreSignIn() throws InterruptedException, PageException{
-		final int MAX_WAIT = 20;
-		//try {
-			/*((Button) webPage.findObject(ObjectType.Button,
-				MainPageElements.Nav_SignIn_Title_XPATH, ObjectValType.XPATH, MAX_WAIT,
-					WaitCondition.CLICKABLE)).click();*/ 
-		
-			//"nav-link-yourAccount"
-				
+			final int MAX_WAIT = 20;
 			CommonUtil.sop("this is presignIn");
-			//webPage.findObjectById("nav-link-yourAccount").click();
+			
 			((Button) webPage.findObject(ObjectType.Button, "nav-link-yourAccount",
 					ObjectValType.ID, MAX_WAIT, WaitCondition.CLICKABLE)).hover();
 			
 			((Button) webPage.findObject(ObjectType.Button, "nav-link-yourAccount",
 					ObjectValType.ID, MAX_WAIT, WaitCondition.CLICKABLE)).click();
 			
-			
-			/*((Button) webPage.findObject(ObjectType.Button, "nav-link-yourAccount",
-					ObjectValType.ID, MAX_WAIT, WaitCondition.CLICKABLE)).hover();*/
-			
-			/*((Button) webPage.findObject(ObjectType.Button, ".//*[@id='nav-link-yourAccount']/span[1]",
-					ObjectValType.XPATH, MAX_WAIT, WaitCondition.CLICKABLE)).hover();
-			
-			
-			((Button) webPage.findObject(ObjectType.Button, ".//*[@id='nav-flyout-ya-signin']/a/span",
-					ObjectValType.XPATH, MAX_WAIT, WaitCondition.CLICKABLE)).click();*/
 			Thread.sleep(2000);
-
 			
 		}	
-		/*catch (Exception e) {
-			SoftAssertor.addVerificationFailure(e.getMessage());
-			CommonUtil.sop("Exception is here");
-			CommonUtil.sop(e.getMessage());			
-		}*/
-	//}
+		
 	
 	
 	/**
@@ -141,27 +118,50 @@ public class AmazonMainPage extends CommonPage {
 	public void SignIn() throws InterruptedException, PageException
 	{
 		final int MAX_WAIT = 20;
-		//try{
-			((TextBox) webPage.findObject(ObjectType.TextBox,
-				"ap_email", ObjectValType.ID, MAX_WAIT, WaitCondition.VISIBLE))
-					.enterText("");
-
-			((TextBox) webPage.findObject(ObjectType.TextBox,
-					"ap_password", ObjectValType.ID, MAX_WAIT,
-					WaitCondition.VISIBLE)).enterText("");
-			
 		
-			((Button) webPage.findObject(ObjectType.Button,
-				"signInSubmit-input", ObjectValType.ID, MAX_WAIT,
-					WaitCondition.CLICKABLE)).click();
+		((TextBox) webPage.findObject(ObjectType.TextBox,
+			"ap_email", ObjectValType.ID, MAX_WAIT, WaitCondition.VISIBLE))
+				.enterText("");
+
+		((TextBox) webPage.findObject(ObjectType.TextBox,
+				"ap_password", ObjectValType.ID, MAX_WAIT,
+				WaitCondition.VISIBLE)).enterText("");
+		
+	
+		((Button) webPage.findObject(ObjectType.Button,
+			"signInSubmit-input", ObjectValType.ID, MAX_WAIT,
+				WaitCondition.CLICKABLE)).click();	
 			
-				
-			/* }catch (Exception e) {
-			SoftAssertor.addVerificationFailure(e.getMessage());
-			CommonUtil.sop("exception 2");	
-			CommonUtil.sop(e.getMessage());
-		}*/
 	}
+	
+	//The below methods are written using latest ITafElement code
+	
+	public void PreSignInWithITafElement() throws InterruptedException, PageException{
+			CommonUtil.sop("this is PreSignInWithITafElement");
+			Thread.sleep(2000);
+			( webPage.findObjectById("nav-link-yourAccount")).hover();
+			( webPage.findObjectById("nav-link-yourAccount")).click();			
+			
+		}	
+		
+	
+	/**
+	 * Sign in.
+	 *
+	 * @throws InterruptedException the interrupted exception
+	 * @throws PageException the page exception
+	 */
+	public void SignInWithITafElement() throws InterruptedException, PageException
+	{
+		CommonUtil.sop("this is signInWIthITafElement");
+		Thread.sleep(2000);
+		(webPage.findObjectById("ap_email")).sendKeys("lavanya");
+		(webPage.findObjectById("ap_password")).sendKeys("lavanya");
+		(webPage.findObjectById("signInSubmit-input")).click();		
+		Thread.sleep(2000);
+	}
+
+
 }
 
 

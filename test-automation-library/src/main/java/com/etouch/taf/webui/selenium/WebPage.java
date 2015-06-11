@@ -1,8 +1,4 @@
-/*
- * 
- */
 package com.etouch.taf.webui.selenium;
-
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -12,8 +8,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -24,40 +23,44 @@ import com.etouch.taf.core.exception.PageException;
 import com.etouch.taf.core.resources.ObjectValType;
 import com.etouch.taf.core.resources.WaitCondition;
 import com.etouch.taf.util.BrowserInfoUtil;
+import com.etouch.taf.util.CommonUtil;
+import com.etouch.taf.util.ConfigUtil;
 import com.etouch.taf.util.LogUtil;
+import com.etouch.taf.webui.ITafElement;
+import com.etouch.taf.webui.ITafElementFactory;
+import com.etouch.taf.webui.TafElementFactoryManager;
 import com.etouch.taf.webui.selenium.webelement.Element;
+import com.etouch.taf.webui.qtp.QTPElement;
 
 // TODO: Auto-generated Javadoc
 /**
- * This class finds and renders page objects , drivers.
- * 
- * @author eTouch Systems Corporation
- * @version 1.0
- * 
+ * The Class WebPage.
  */
 public class WebPage {
 	
 	/** The log. */
 	private static Log log = LogUtil.getLog(WebPage.class);
 	
-	//private static TestBedManager testBedManager = null; 
 	/** The driver. */
-	protected WebDriver driver = null;
+	protected WebDriver driver = null;	
 	
 	//value for the wait loop
 	/** The wait to check. */
 	private int WAIT_TO_CHECK = 500;
 	
+	/** The test type. */
+	private String testType = null;
+	
 	/**
 	 * Initializes web driver and test bed manager.
 	 */
 	public WebPage() {		
-		//if (this.driver == null) {
-			this.driver=(WebDriver)TestBedManager.INSTANCE.getCurrentTestBed().getDriver();
-		//}
-		//testBedManager = manager;
+		
+			this.driver=(WebDriver)TestBedManager.INSTANCE.getCurrentTestBed().getDriver();		
+			this.testType = TestBedManager.INSTANCE.getCurrentTestBed().getTestType();
+			CommonUtil.sop("Test Type is: " + this.testType);
 	}
-
+	
 	/**
 	 * 
 	 * Returns driver.
@@ -67,7 +70,7 @@ public class WebPage {
 	public WebDriver getDriver() {
 		return driver;
 	}
-
+	
 	/**
 	 * Loads web page URL.
 	 * @param pageUrl web page URL
@@ -80,7 +83,309 @@ public class WebPage {
 		}
 		
 	}
+	
+	/**
+	 * Returns current URL.
+	 *
+	 * @return the current url
+	 */
+	public String getCurrentUrl(){
+		return driver.getCurrentUrl();
+	}
+	
+	
+	/**
+	 * Creates the element.
+	 *
+	 * @param webElement the web element
+	 * @param testType the test type
+	 * @return the i taf element
+	 */
+	private ITafElement createElement(WebElement webElement, String testType){
+		
+		ITafElementFactory factory = TafElementFactoryManager.getFactory(testType);
+		return factory.createElement(webElement);				
+	}
 
+	
+	/**
+	 * Find object by id.
+	 *
+	 * @param id the id
+	 * @return the web element
+	 * @throws PageException the page exception
+	 */
+	public  ITafElement  findObjectById(String id) throws PageException
+	{
+		WebElement webElement = null;
+		try{
+				webElement = driver.findElement(By.id(id));
+				}catch (Exception e)
+				{
+					log.error("Failed to find object using given id" + " = "+ id + ", message : " + e.toString());
+					throw new PageException("Failed to find object using given id , message : " + e.toString());
+				}
+				//return  PageObjectFactory.createPageObject(webElement,testType);
+		return createElement(webElement,testType);
+	}
+	
+	
+	/**
+	 * Find object by name.
+	 *
+	 * @param name the name
+	 * @return the web element
+	 * @throws PageException the page exception
+	 */
+	public ITafElement findObjectByName(String name) throws PageException
+	{
+		
+		WebElement webElement = null;
+		try{
+			  webElement = driver.findElement(By.name(name));
+		}catch (Exception e){
+			log.error("Failed to find object using given name" + " = " + name + ", message : " + e.toString());
+        	throw new PageException("Failed to find object using given name, message : " + e.toString());
+		}		
+		
+		return createElement(webElement,testType);
+	}
+	
+	/**
+	 * Find object byx path.
+	 *
+	 * @param xpath the xpath
+	 * @return the web element
+	 * @throws PageException the page exception
+	 */
+	public ITafElement findObjectByxPath(String xpath) throws PageException{
+		WebElement webElement = null;
+		try{
+			webElement = driver.findElement(By.xpath(xpath));
+		}catch (Exception e){
+			log.error("Failed to find object using given xpath"+ " = " + " , message : " + e.toString());
+        	throw new PageException("Failed to find object using given xpath, message : " + e.toString());
+		}
+		
+		return createElement(webElement,testType);
+	}	
+	
+	/**
+	 * Find object by css.
+	 *
+	 * @param css the css
+	 * @return the web element
+	 * @throws PageException the page exception
+	 */
+	public ITafElement findObjectByCss(String css) throws PageException{
+		WebElement webElement = null;
+		try{
+			webElement = driver.findElement(By.cssSelector(css));
+		}catch (Exception e){
+			log.error("Failed to find object using given css" + " = " + css + ", message : " + e.toString());
+        	throw new PageException("Failed to find object using given css, message : " + e.toString());
+		}		
+		return createElement(webElement,testType);
+	}
+	
+	/**
+	 * Find object by link.
+	 *
+	 * @param link the link
+	 * @return the web element
+	 * @throws PageException the page exception
+	 */
+	public ITafElement findObjectByLink(String link) throws PageException{
+		WebElement webElement = null;
+		try{
+			webElement = driver.findElement(By.linkText(link)); 
+		}catch (Exception e){
+			log.error("Failed to find object using given link" + " = " + link + ", message : " + e.toString());
+        	throw new PageException("Failed to find object using given link , message : " + e.toString());
+		}
+		
+		return createElement(webElement,testType);
+	}
+	
+	/**
+	 * Find object by partial link.
+	 *
+	 * @param link the link
+	 * @return the web element
+	 * @throws PageException the page exception
+	 */
+	public ITafElement findObjectByPartialLink(String link) throws PageException{
+		WebElement webElement = null;
+		try{
+			webElement = driver.findElement(By.partialLinkText(link)); 
+		}catch (Exception e){
+			log.error("Failed to find object using given partial link" + " = " + link + ", message : " + e.toString());
+        	throw new PageException("Failed to find object using given partial link, message : " + e.toString());
+		}	
+		
+		return createElement(webElement,testType);
+	}
+	
+	/**
+	 * Find object by class.
+	 *
+	 * @param className the class name
+	 * @return the web element
+	 * @throws PageException the page exception
+	 */
+	public ITafElement findObjectByClass(String className) throws PageException{
+		WebElement webElement = null;
+		try{
+			webElement = driver.findElement(By.className(className)); 
+		}catch (Exception e){
+			log.error("Failed to find object using given class name" + " = " + className + ", message : " + e.toString());
+        	throw new PageException("Failed to find object using given class name, message : " + e.toString());
+		}		
+		
+		return createElement(webElement,testType);
+	}
+	
+	/**
+	 * Find objects by tag.
+	 *
+	 * @param tag the tag
+	 * @return the list
+	 * @throws PageException the page exception
+	 */
+	public List<ITafElement> findObjectsByTag(String tag) throws PageException{
+		List<ITafElement> l1 = new ArrayList<ITafElement>();
+		List<WebElement> lst=null;
+		try{
+				lst = driver.findElements(By.tagName(tag));
+			}catch (Exception e)
+			{
+				log.error("Failed to find objects using given Tag" + " = " + tag + ", message : " + e.toString());
+	        	throw new PageException("Failed to find object using given Tag , message : " + e.toString());
+			}
+		
+		for(WebElement we : lst){
+			l1.add(createElement(we,testType));
+		}
+		return l1;
+		
+	}
+	
+	
+	/**
+	 * Find objects by xpath.
+	 *
+	 * @param xpath the xpath
+	 * @return the list
+	 * @throws PageException the page exception
+	 */
+	public List<ITafElement> findObjectsByXpath(String xpath) throws PageException{
+		List<ITafElement> l1 = new ArrayList<ITafElement>();
+		List<WebElement> lst=null;
+		try{
+				lst = driver.findElements(By.xpath(xpath));				
+			}catch (Exception e)
+			{
+				log.error("Failed to find objects using given xpath" + " = " + xpath + ", message : " + e.toString());
+		    	throw new PageException("Failed to find object using given xpath , message : " + e.toString());
+			}
+		for(WebElement we : lst){
+			l1.add(createElement(we,testType));
+		}
+		return l1;
+	}
+	
+	/**
+	 * Find objects using link.
+	 *
+	 * @param link the link
+	 * @return the list
+	 * @throws PageException the page exception
+	 */
+	public List<ITafElement> findObjectsByLink(String link) throws PageException{
+		List<ITafElement> l1 = new ArrayList<ITafElement>();
+		List<WebElement> lst=null;
+		try{
+				lst = driver.findElements(By.linkText(link));
+			}catch (Exception e)
+			{
+				log.error("Failed to find objects using given link" + " = " + link + ", message : " + e.toString());
+		    	throw new PageException("Failed to find object using given link , message : " + e.toString());
+			}
+		for(WebElement we : lst){
+			l1.add(createElement(we,testType));
+		}
+		return l1;
+	}
+	
+	/**
+	 * Find objects using partial link.
+	 *
+	 * @param link the link
+	 * @return the list
+	 * @throws PageException the page exception
+	 */
+	public List<ITafElement> findObjectsByPartialLink(String link) throws PageException{
+		List<ITafElement> l1 = new ArrayList<ITafElement>();
+		List<WebElement> lst=null;
+		try{
+				lst = driver.findElements(By.partialLinkText(link));
+			}catch (Exception e)
+			{
+				log.error("Failed to find objects using given link" + " = " + link + ", message : " + e.toString());
+		    	throw new PageException("Failed to find object using given link , message : " + e.toString());
+			}
+		for(WebElement we : lst){
+			l1.add(createElement(we,testType));
+		}
+		return l1;
+	}
+	
+	/**
+	 * Find objects using class.
+	 *
+	 * @param className the class name
+	 * @return the list
+	 * @throws PageException the page exception
+	 */
+	public List<ITafElement> findObjectsByClass(String className) throws PageException{
+		List<ITafElement> l1 = new ArrayList<ITafElement>();
+		List<WebElement> lst=null;
+		try{
+				lst = driver.findElements(By.className(className));
+			}catch (Exception e)
+			{
+				log.error("Failed to find objects using given class" + " = " + className + ", message : " + e.toString());
+		    	throw new PageException("Failed to find object using given class , message : " + e.toString());
+			}
+		for(WebElement we : lst){
+			l1.add(createElement(we,testType));
+		}
+		return l1;
+	}
+	
+	/**
+	 * Find objects by css.
+	 *
+	 * @param css the css
+	 * @return the list
+	 * @throws PageException the page exception
+	 */
+	public List<ITafElement> findObjectsByCss(String css) throws PageException{
+		List<ITafElement> l1 = new ArrayList<ITafElement>();
+		List<WebElement> lst=null;
+		try{
+				lst = driver.findElements(By.cssSelector(css));
+			}catch (Exception e)
+			{
+				log.error("Failed to find objects using given class" + " = " + css + ", message : " + e.toString());
+		    	throw new PageException("Failed to find object using given class , message : " + e.toString());
+			}
+		for(WebElement we : lst){
+			l1.add(createElement(we,testType));
+		}
+		return l1;
+	}
+	
 	/**
 	 * find the specified object using an id .
 	 *
@@ -91,6 +396,7 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingId(String object, String id) throws PageException{
 		WebElement webElement = null;
@@ -98,9 +404,9 @@ public class WebPage {
 			webElement = driver.findElement(By.id(id));
 		}catch (Exception e){
 			log.error("Failed to find object using given id" + " = "+ id + ", message : " + e.toString());
-        	throw new PageException("Failed to find object using given id , message : " + e.toString());
+       	throw new PageException("Failed to find object using given id , message : " + e.toString());
 		}		
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -113,6 +419,7 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingName(String object, String name) throws PageException{
 		WebElement webElement = null;
@@ -120,9 +427,9 @@ public class WebPage {
 			  webElement = driver.findElement(By.id(name));
 		}catch (Exception e){
 			log.error("Failed to find object using given name" + " = " + name + ", message : " + e.toString());
-        	throw new PageException("Failed to find object using given name, message : " + e.toString());
+       	throw new PageException("Failed to find object using given name, message : " + e.toString());
 		}		
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -135,6 +442,7 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingxPath(String object, String xpath) throws PageException{
 		WebElement webElement = null;
@@ -142,9 +450,9 @@ public class WebPage {
 			webElement = driver.findElement(By.xpath(xpath));
 		}catch (Exception e){
 			log.error("Failed to find object using given xpath"+ " = " + " , message : " + e.toString());
-        	throw new PageException("Failed to find object using given xpath, message : " + e.toString());
+       	throw new PageException("Failed to find object using given xpath, message : " + e.toString());
 		}		
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}	
 	
 	/**
@@ -157,6 +465,7 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingCss(String object, String css) throws PageException{
 		WebElement webElement = null;
@@ -164,9 +473,9 @@ public class WebPage {
 			webElement = driver.findElement(By.cssSelector(css));
 		}catch (Exception e){
 			log.error("Failed to find object using given css" + " = " + css + ", message : " + e.toString());
-        	throw new PageException("Failed to find object using given css, message : " + e.toString());
+       	throw new PageException("Failed to find object using given css, message : " + e.toString());
 		}		
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -179,6 +488,7 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingLink(String object, String link) throws PageException{
 		WebElement webElement = null;
@@ -186,9 +496,9 @@ public class WebPage {
 			webElement = driver.findElement(By.linkText(link)); 
 		}catch (Exception e){
 			log.error("Failed to find object using given link" + " = " + link + ", message : " + e.toString());
-        	throw new PageException("Failed to find object using given link , message : " + e.toString());
+       	throw new PageException("Failed to find object using given link , message : " + e.toString());
 		}		
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -201,6 +511,7 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingPartialLink(String object, String link) throws PageException{
 		WebElement webElement = null;
@@ -208,9 +519,9 @@ public class WebPage {
 			webElement = driver.findElement(By.partialLinkText(link)); 
 		}catch (Exception e){
 			log.error("Failed to find object using given partial link" + " = " + link + ", message : " + e.toString());
-        	throw new PageException("Failed to find object using given partial link, message : " + e.toString());
+       	throw new PageException("Failed to find object using given partial link, message : " + e.toString());
 		}		
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -223,6 +534,7 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingClass(String object, String name) throws PageException{
 		WebElement webElement = null;
@@ -230,9 +542,9 @@ public class WebPage {
 			webElement = driver.findElement(By.className(name)); 
 		}catch (Exception e){
 			log.error("Failed to find object using given class name" + " = " + name + ", message : " + e.toString());
-        	throw new PageException("Failed to find object using given class name, message : " + e.toString());
+       	throw new PageException("Failed to find object using given class name, message : " + e.toString());
 		}		
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -245,6 +557,8 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObject(String object, String val, ObjectValType valType) throws PageException{
 		WebElement webElement = null;
@@ -253,9 +567,9 @@ public class WebPage {
 			webElement = ((WebDriver)driver).findElement((By)m.invoke(By.class, val));
 		}catch (Exception e){
 			log.error("Failed to find object using given "+ valType + " = " + val +", message : " + e.toString());
-        	throw new PageException("Failed to find object using given "+ valType + ", message : " + e.toString());
+       	throw new PageException("Failed to find object using given "+ valType + ", message : " + e.toString());
 		}		
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -269,11 +583,12 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingId(String object, String id, int wait) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.id(id), (wait==-1)?TestBed.MaxWaitSeconds:wait, null);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -287,11 +602,12 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */ 
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingName(String object, String name, int wait) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.name(name), (wait==-1)?TestBed.MaxWaitSeconds:wait, null);
-		return (T) PageObjectFactory.createPageObject(webElement,object);	
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);	
 	}
 
 	/**
@@ -305,11 +621,12 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */ 
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingXpath(String object, String xpath, int wait) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.xpath(xpath), (wait==-1)?TestBed.MaxWaitSeconds:wait, null);
-		return (T) PageObjectFactory.createPageObject(webElement,object);		
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);		
 	}
 	
 	/**
@@ -323,11 +640,12 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingCss(String object, String css, int wait) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.cssSelector(css), (wait==-1)?TestBed.MaxWaitSeconds:wait, null);
-		return (T) PageObjectFactory.createPageObject(webElement,object);		
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);		
 	}
 	
 	/**
@@ -341,11 +659,12 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingLink(String object, String link, int wait) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.linkText(link), (wait==-1)?TestBed.MaxWaitSeconds:wait, null);
-		return (T) PageObjectFactory.createPageObject(webElement,object);		
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);		
 	}
 	
 	/**
@@ -359,11 +678,12 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingPartialLink(String object, String link, int wait) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.partialLinkText(link), (wait==-1)?TestBed.MaxWaitSeconds:wait, null);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 		
 	}
 	
@@ -378,11 +698,12 @@ public class WebPage {
 	 * @exception PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingClass(String object, String name, int wait) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.className(name), (wait==-1)?TestBed.MaxWaitSeconds:wait, null);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -396,6 +717,8 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObject(String object, String val, ObjectValType valType, int wait) throws PageException{
 		WebElement webElement=null;
@@ -405,9 +728,9 @@ public class WebPage {
 			webElement = waitOnElement(((By)m.invoke(By.class, val)), (wait==-1)?TestBed.MaxWaitSeconds:wait, null);
 		} catch (Exception e) {
 			log.error("Failed to find object using given "+ valType + " = " + val +", message : " + e.toString());
-        	throw new PageException("Failed to find object using given "+ valType + ", message : " + e.toString());
+       	throw new PageException("Failed to find object using given "+ valType + ", message : " + e.toString());
 		}
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -422,11 +745,12 @@ public class WebPage {
 	 * @throws PageException throws this exception if object not found
 	 */
 
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingId(String object, String id, int wait, WaitCondition condition) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.id(id), (wait==-1)?TestBed.MaxWaitSeconds:wait, null,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -440,11 +764,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingName(String object, String name, int wait, WaitCondition condition) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.name(name), (wait==-1)?TestBed.MaxWaitSeconds:wait, null,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -458,11 +784,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingXpath(String object, String xpath, int wait, WaitCondition condition) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.xpath(xpath), (wait==-1)?TestBed.MaxWaitSeconds:wait, null,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -476,11 +804,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingCss(String object, String css, int wait, WaitCondition condition) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.cssSelector(css), (wait==-1)?TestBed.MaxWaitSeconds:wait, null,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -494,11 +824,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingLink(String object, String link, int wait, WaitCondition condition) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.linkText(link), (wait==-1)?TestBed.MaxWaitSeconds:wait, null,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -512,11 +844,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingPartialLink(String object, String link, int wait, WaitCondition condition) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.partialLinkText(link), (wait==-1)?TestBed.MaxWaitSeconds:wait, null,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -530,11 +864,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingClass(String object, String name, int wait, WaitCondition condition) throws PageException{
 		WebElement webElement=null;
 		webElement = waitOnElement(By.className(name), (wait==-1)?TestBed.MaxWaitSeconds:wait, null,condition);		
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -549,6 +885,8 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObject(String object, String val, ObjectValType valType, int wait, WaitCondition condition) throws PageException{
 		WebElement webElement=null;
@@ -558,12 +896,12 @@ public class WebPage {
 			webElement = waitOnElement(((By)m.invoke(By.class, val)), (wait==-1)?TestBed.MaxWaitSeconds:wait, null,condition);
 		} catch (Exception e) {
 			
-				log.error("Failed to find object using given "+ valType + "  =  " + val +", message : " + e.getMessage());
+				log.error("Failed to find object using given " + valType + "  =  " + val +", message : " + e.getMessage());
 			
 			;
-        	throw new PageException("Failed to find object using given "+ valType + ", message : " + e.toString());
+       	throw new PageException("Failed to find object using given "+ valType + ", message : " + e.toString());
 		}		
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -578,11 +916,12 @@ public class WebPage {
 	 * @throws PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingId(String object, String id, int wait, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement = (waitOnElement(By.id(id), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame));
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -596,11 +935,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingName(String object, String name, int wait, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement = (waitOnElement(By.name(name), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame));
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 
 	/**
@@ -614,11 +955,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingXpath(String object, String xpath, int wait, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement = (waitOnElement(By.xpath(xpath), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame));
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -632,11 +975,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingCss(String object, String css, int wait, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement = (waitOnElement(By.cssSelector(css), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame));
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -650,11 +995,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingLink(String object, String link, int wait, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement = (waitOnElement(By.linkText(link), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame));
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -668,11 +1015,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingPartialLink(String object, String link, int wait, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement = (waitOnElement(By.partialLinkText(link), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame));
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -686,11 +1035,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingClass(String object, String name, int wait, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement = (waitOnElement(By.className(name), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame));
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -705,6 +1056,8 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObject(String object, String val, ObjectValType valType, int wait, String frame) throws PageException{
 		WebElement webElement = null;
@@ -714,9 +1067,9 @@ public class WebPage {
 			webElement = (waitOnElement(((By)m.invoke(By.class, val)), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame));
 		} catch (Exception e) {
 			log.error("Failed to find object using given "+ valType + " = " + val + ", message : " + e.toString());
-        	throw new PageException("Failed to find object using given "+ valType + ", message : " + e.toString());
+       	throw new PageException("Failed to find object using given "+ valType + ", message : " + e.toString());
 		}
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -732,11 +1085,12 @@ public class WebPage {
 	 * @throws PageException throws this exception if object not found
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingId(String object, String id, int wait, WaitCondition condition, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement=waitOnElement(By.id(id), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -751,11 +1105,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingName(String object, String name, int wait, WaitCondition condition, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement=waitOnElement(By.name(name), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 
 	/**
@@ -770,11 +1126,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingXpath(String object, String xpath, int wait, WaitCondition condition, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement=waitOnElement(By.xpath(xpath), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -789,11 +1147,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingCss(String object, String css, int wait, WaitCondition condition, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement=waitOnElement(By.cssSelector(css), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -808,11 +1168,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingLink(String object, String link, int wait, WaitCondition condition, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement=waitOnElement(By.linkText(link), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -827,11 +1189,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingPartialLink(String object, String link, int wait, WaitCondition condition, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement=waitOnElement(By.partialLinkText(link), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -846,11 +1210,13 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObjectUsingClass(String object, String name, int wait, WaitCondition condition, String frame) throws PageException{
 		WebElement webElement = null;
 		webElement=waitOnElement(By.className(name), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame,condition);
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -866,6 +1232,8 @@ public class WebPage {
 	 * @return the t
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> T findObject(String object, String val, ObjectValType valType, int wait, WaitCondition condition, String frame) throws PageException{
 		WebElement webElement = null;
@@ -875,9 +1243,9 @@ public class WebPage {
 			webElement = (waitOnElement(((By)m.invoke(By.class, val)), (wait==-1)?TestBed.MaxWaitSeconds:wait, (frame==null||"".equals(frame))?null:frame,condition));
 		} catch (Exception e) {
 			log.error("Failed to find object using given "+ valType + " = " + val +", message : " + e.toString());
-        	throw new PageException("Failed to find object using given "+ valType + ", message : " + e.toString());
+       	throw new PageException("Failed to find object using given "+ valType + ", message : " + e.toString());
 		}
-		return (T) PageObjectFactory.createPageObject(webElement,object);
+		return (T) PageObjectFactory.createCustomPageObject(webElement,object);
 	}
 	
 	/**
@@ -890,13 +1258,14 @@ public class WebPage {
 	 * @throws PageException the page exception
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> List<T> findObjectsUsingTag(String object, String tag) throws PageException{
 		List<T> l1 = new ArrayList<T>();
 		List<WebElement> lst=null;
 		lst = driver.findElements(By.tagName(tag));
 		for(WebElement we : lst){
-			l1.add((T) PageObjectFactory.createPageObject(we,object));
+			l1.add((T) PageObjectFactory.createCustomPageObject(we,object));
 		}
 		return l1;
 	}
@@ -910,13 +1279,15 @@ public class WebPage {
 	 * @return the list
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> List<T> findObjectsUsingXpath(String object, String xpath) throws PageException{
 		List<T> l1 = new ArrayList<T>();
 		List<WebElement> lst=null;
 		lst = driver.findElements(By.xpath(xpath));
 		for(WebElement we : lst){
-			l1.add((T) PageObjectFactory.createPageObject(we,object));
+			l1.add((T) PageObjectFactory.createCustomPageObject(we,object));
 		}
 		return l1;
 	}
@@ -930,13 +1301,15 @@ public class WebPage {
 	 * @return the list
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> List<T> findObjectsUsingLink(String object, String link) throws PageException{
 		List<T> l1 = new ArrayList<T>();
 		List<WebElement> lst=null;
 		lst = driver.findElements(By.linkText(link));
 		for(WebElement we : lst){
-			l1.add((T) PageObjectFactory.createPageObject(we,object));
+			l1.add((T) PageObjectFactory.createCustomPageObject(we,object));
 		}
 		return l1;
 	}
@@ -950,13 +1323,15 @@ public class WebPage {
 	 * @return the list
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> List<T> findObjectsUsingPartialLink(String object, String link) throws PageException{
 		List<T> l1 = new ArrayList<T>();
 		List<WebElement> lst=null;
 		lst = driver.findElements(By.partialLinkText(link));
 		for(WebElement we : lst){
-			l1.add((T) PageObjectFactory.createPageObject(we,object));
+			l1.add((T) PageObjectFactory.createCustomPageObject(we,object));
 		}
 		return l1;
 	}
@@ -970,13 +1345,15 @@ public class WebPage {
 	 * @return the list
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> List<T> findObjectsUsingClass(String object, String name) throws PageException{
 		List<T> l1 = new ArrayList<T>();
 		List<WebElement> lst=null;
 		lst = driver.findElements(By.className(name));
 		for(WebElement we : lst){
-			l1.add((T) PageObjectFactory.createPageObject(we,object));
+			l1.add((T) PageObjectFactory.createCustomPageObject(we,object));
 		}
 		return l1;
 	}
@@ -991,6 +1368,8 @@ public class WebPage {
 	 * @return the list
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> List<T> findObjects(String object, String val, ObjectValType valType) throws PageException{
 		List<T> l1 = new ArrayList<T>();
@@ -1001,10 +1380,10 @@ public class WebPage {
 			lst= driver.findElements((By)m.invoke(By.class, val));
 		} catch (Exception e) {
 			log.error("Can not find objects for: "+ valType + " = " + val +", message : " + e.toString());
-        	throw new PageException("Can not find objects for:  "+ valType + ", message : " + e.toString());
+       	throw new PageException("Can not find objects for:  "+ valType + ", message : " + e.toString());
 		}
 		for(WebElement we : lst){
-			l1.add((T) PageObjectFactory.createPageObject(we,object));
+			l1.add((T) PageObjectFactory.createCustomPageObject(we,object));
 		}
 		return l1;
 	}
@@ -1021,13 +1400,14 @@ public class WebPage {
 	 * @throws PageException the page exception
 	 */
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> List<T> findObjectsUsingTag(String object, String tag, int wait, WaitCondition condition) throws PageException{
 		List<T> l1 = new ArrayList<T>();
 		List<WebElement> lst =  null;
 		lst= waitOnElements(By.tagName(tag),wait,condition);
 		for(WebElement we : lst){
-			l1.add((T) PageObjectFactory.createPageObject(we,object));
+			l1.add((T) PageObjectFactory.createCustomPageObject(we,object));
 		}
 		return l1;
 	}
@@ -1043,13 +1423,15 @@ public class WebPage {
 	 * @return the list
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> List<T> findObjectsUsingXpath(String object, String xpath, int wait, WaitCondition condition) throws PageException{
 		List<T> l1 = new ArrayList<T>();
 		List<WebElement> lst =  null;
 		lst= waitOnElements(By.xpath(xpath),wait,condition);
 		for(WebElement we : lst){
-			l1.add((T) PageObjectFactory.createPageObject(we,object));
+			l1.add((T) PageObjectFactory.createCustomPageObject(we,object));
 		}
 		return l1;
 	}
@@ -1065,13 +1447,15 @@ public class WebPage {
 	 * @return the list
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> List<T> findObjectsUsingLink(String object, String link, int wait, WaitCondition condition) throws PageException{
 		List<T> l1 = new ArrayList<T>();
 		List<WebElement> lst =  null;
 		lst= waitOnElements(By.linkText(link),wait,condition);
 		for(WebElement we : lst){
-			l1.add((T) PageObjectFactory.createPageObject(we,object));
+			l1.add((T) PageObjectFactory.createCustomPageObject(we,object));
 		}
 		return l1;
 	}
@@ -1087,13 +1471,15 @@ public class WebPage {
 	 * @return the list
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> List<T> findObjectsUsingPartialLink(String object, String link, int wait, WaitCondition condition) throws PageException{
 		List<T> l1 = new ArrayList<T>();
 		List<WebElement> lst =  null;
 		lst= waitOnElements(By.partialLinkText(link),wait,condition);
 		for(WebElement we : lst){
-			l1.add((T) PageObjectFactory.createPageObject(we,object));
+			l1.add((T) PageObjectFactory.createCustomPageObject(we,object));
 		}
 		return l1;
 	}
@@ -1109,13 +1495,15 @@ public class WebPage {
 	 * @return the list
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> List<T> findObjectsUsingClass(String object, String name, int wait, WaitCondition condition) throws PageException{
 		List<T> l1 = new ArrayList<T>();
 		List<WebElement> lst =  null;
 		lst= waitOnElements(By.className(name),wait,condition);
 		for(WebElement we : lst){
-			l1.add((T) PageObjectFactory.createPageObject(we,object));
+			l1.add((T) PageObjectFactory.createCustomPageObject(we,object));
 		}
 		return l1;
 	}
@@ -1132,6 +1520,8 @@ public class WebPage {
 	 * @return the list
 	 * @throws PageException the page exception
 	 */
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public <T extends Element> List<T> findObjects(String object, String val, ObjectValType valType, int wait, WaitCondition condition) throws PageException{
 		List<T> l1 = new ArrayList<T>();
@@ -1142,10 +1532,10 @@ public class WebPage {
 			lst= waitOnElements(((By)m.invoke(By.class, val)),wait,condition);
 		} catch (Exception e) {
 			log.error("Can not find objects for: "+ valType + " = " + val +", message : " + e.toString());
-        	throw new PageException("Can not find objects for:  "+ valType + ", message : " + e.toString());
+       	throw new PageException("Can not find objects for:  "+ valType + ", message : " + e.toString());
 		}
 		for(WebElement we : lst){
-			l1.add((T) PageObjectFactory.createPageObject(we,object));
+			l1.add((T) PageObjectFactory.createCustomPageObject(we,object));
 		}
 		return l1;
 	}
@@ -1295,14 +1685,162 @@ public class WebPage {
 	}
 	
 	/**
-	 * Returns current URL.
-	 *
-	 * @return the current url
+	 * Zooms in the web page.
 	 */
-	public String getCurrentUrl(){
-		return driver.getCurrentUrl();
+	public void zoomIn(int counter)
+	{
+		TestBed testBed = TestBedManager.INSTANCE.getCurrentTestBed();
+		WebElement html = driver.findElement(By.tagName("html"));
+		if(ConfigUtil.isWindows(testBed))
+		{		
+			for(int i=0; i<counter; i++)
+				html.sendKeys(Keys.chord(Keys.CONTROL, Keys.ADD));		
+		}
+		else if(ConfigUtil.isMac(testBed))
+		{		
+			for(int i=0; i<counter; i++)
+				html.sendKeys(Keys.chord(Keys.COMMAND, Keys.ADD));
+		}
+		else
+		{
+			log.error("Zoom in not supported for this Operating System");
+		}
 	}
 
+	/**
+	 * Zooms out the web page.
+	 */
+	public void zoomOut(int counter)
+	{
+		TestBed testBed = TestBedManager.INSTANCE.getCurrentTestBed();
+		WebElement html = driver.findElement(By.tagName("html"));
+		
+		if(ConfigUtil.isWindows(testBed))
+		{
+			for(int i=0; i<counter; i++)
+				html.sendKeys(Keys.chord(Keys.CONTROL, Keys.SUBTRACT));
+		}
+		else if(ConfigUtil.isMac(testBed))
+		{	for(int i=0; i<counter; i++)	
+				html.sendKeys(Keys.chord(Keys.COMMAND, Keys.SUBTRACT));
+		}
+		else
+		{
+			log.error("Zoom out not supported for this Operating System");;
+		}
+	}
+	
+	public void zoomTo100()
+	{
+		TestBed testBed = TestBedManager.INSTANCE.getCurrentTestBed();
+		WebElement html = driver.findElement(By.tagName("html"));
+		if(ConfigUtil.isWindows(testBed))
+		{
+			
+			html.sendKeys(Keys.chord(Keys.CONTROL, "0"));		
+		}
+		else if(ConfigUtil.isMac(testBed))
+		{		
+			
+			html.sendKeys(Keys.chord(Keys.COMMAND, "0"));
+		}
+		else
+		{
+			log.error("Zoom is not supported for this Operating System");
+		}
+	}
+	
+	
+	/**
+	 * Scroll up the Page.
+	 */
+	public void scrollUp(int count)
+	{
+		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		for(int i=0; i<count; i++)
+			jse.executeScript("window.scrollBy(0,-250)", "");
+	}
+	
+	/**
+	 * Scrolls down the Page.
+	 */
+	public void scrollDown(int count)
+	{
+		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		for(int i=0; i<count; i++)
+			jse.executeScript("window.scrollBy(0,250)", "");
+	}
+	
+	/**
+	 * Scrolls right to the page.
+	 */
+	public void scrollRight()
+	{
+		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		jse.executeScript("window.scrollBy(250,0)", "");
+		
+	}
+	
+	/**
+	 * Scrolls left to the page.
+	 */
+	public void scrollLeft()
+	{
+		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		jse.executeScript("window.scrollBy(-250,0)", "");
+	}
+	
+	/**
+	 * Scroll to element.
+	 *
+	 * @param element the element
+	 */
+	public void scrollToElement(ITafElement element)
+	{
+		org.openqa.selenium.WebElement elementToScroll = element.getWebElement();
+		((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();", elementToScroll);
+	}
+	
+	/**
+	 * Scroll bottom.
+	 */
+	public void scrollBottom()
+	{
+		/*Actions actions = new Actions(driver);
+		actions.keyDown(Keys.CONTROL).sendKeys(Keys.END).perform();*/
+		
+		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		jse.executeScript("window.scrollTo(0,Math.max(document.documentElement.scrollHeight,document.body.scrollHeight,document.documentElement.clientHeight));");
+	}
+
+	/**
+	 * Scroll top.
+	 */
+	public void scrollTop()
+	{
+		Actions actions = new Actions(driver);
+		actions.keyDown(Keys.CONTROL).sendKeys(Keys.HOME).perform();
+	}
+	
+	/**
+	 * Full scroll in slow motion.
+	 *
+	 * @throws InterruptedException the interrupted exception
+	 */
+	public void fullScrollInSlowMotion() throws InterruptedException
+	{
+		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		for (int second = 0;; second++) {
+		        if(second >=60){
+		            break;
+		        }
+		            jse.executeScript("window.scrollBy(0,800)", ""); //y value '800' can be altered
+		            Thread.sleep(1000);
+		}
+		
+	}
+
+	
 	/**
 	 * Gets the transition url.
 	 *
@@ -1377,34 +1915,38 @@ public class WebPage {
 	/**
 	 * Toggle window.
 	 */
-    public void toggleWindow() {
-           String currentHandle = driver.getWindowHandle();
-           log.info("currentHandle:: " + currentHandle);
-           Set<String> windows = driver.getWindowHandles();
-           log.info("no. of windows::" + windows.size());
-           windows.remove(currentHandle);
-           log.info("no. of windows after remove current handle ::" + windows.size());
-           if (windows.size() == 1) {
-                  log.info("switching to window ::" + (String) ((windows.toArray())[0]));
-                  driver.switchTo().window((String) ((windows.toArray())[0]));
-           }
-    }
+   public void toggleWindow() {
+          String currentHandle = driver.getWindowHandle();
+          log.info("currentHandle:: " + currentHandle);
+          Set<String> windows = driver.getWindowHandles();
+          log.info("no. of windows::" + windows.size());
+          windows.remove(currentHandle);
+          log.info("no. of windows after remove current handle ::" + windows.size());
+          if (windows.size() == 1) {
+                 log.info("switching to window ::" + (String) ((windows.toArray())[0]));
+                 driver.switchTo().window((String) ((windows.toArray())[0]));
+          }
+   }
 
-    /**
-     * Close_toggle window.
-     */
-    public void close_toggleWindow() {
-           String currentHandle = driver.getWindowHandle();
-           log.info("currentHandle:: " + currentHandle);
-           Set<String> windows = driver.getWindowHandles();
-           log.info("no. of windows::" + windows.size());
-           driver.switchTo().window(currentHandle).close();
-           windows.remove(currentHandle);
-           log.info("no. of windows after remove current handle ::" + windows.size());
-           if (windows.size() == 1) {
-                  log.info("switching to window ::" + (String) ((windows.toArray())[0]));
-                  driver.switchTo().window((String) ((windows.toArray())[0]));
-           }
-    }	
+   /**
+    * Close_toggle window.
+    */
+   public void close_toggleWindow() {
+          String currentHandle = driver.getWindowHandle();
+          log.info("currentHandle:: " + currentHandle);
+          Set<String> windows = driver.getWindowHandles();
+          log.info("no. of windows::" + windows.size());
+          driver.switchTo().window(currentHandle).close();
+          windows.remove(currentHandle);
+          log.info("no. of windows after remove current handle ::" + windows.size());
+          if (windows.size() == 1) {
+                 log.info("switching to window ::" + (String) ((windows.toArray())[0]));
+                 driver.switchTo().window((String) ((windows.toArray())[0]));
+          }
+   }	  
+   
 	
 }
+
+
+

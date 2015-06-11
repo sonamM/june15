@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.etouch.taf.core.TestBed;
@@ -17,7 +18,7 @@ import com.etouch.taf.util.LogUtil;
 import com.etouch.taf.util.SoftAssertor;
 import com.experitest.selenium.MobileWebDriver;
 
-
+@Ignore
 public class ExperitestCloudDriverTest {
 
 	private static Log log = LogUtil.getLog(ExperitestCloudDriver.class);

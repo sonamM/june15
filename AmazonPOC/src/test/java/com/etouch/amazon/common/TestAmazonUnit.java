@@ -62,13 +62,13 @@ public class TestAmazonUnit extends TestCase{
     	String currentTestBedName = System.getProperty("TESTBEDNAME");
     	String currentEnvironment = System.getProperty("ENVIRONMENT");
     	
-    	String configFilePath = "..\\AmazonPOC\\src\\test\\resources";
+    	String configFilePath = "..//AmazonPOC//src//test//resources";
     	//String configFilePath = "..\\AmazonPOC\\src\\test\\resources\\devConfig.yml";
     	    	
     	InputStream in=null;
 		try {
 				String configFileName = TestUtil.pickConfigFile(currentEnvironment);
-				in = convertFileToInputStream(configFilePath + "\\" + configFileName);
+				in = convertFileToInputStream(configFilePath + "//" + configFileName);
 				CommonUtil.sop(configFileName.substring(0,configFileName.indexOf("Config.yml")) + " config file input stream is ready");
 			} catch (DriverException e1) {
 			// TODO Auto-generated catch block

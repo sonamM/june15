@@ -55,6 +55,9 @@ public class DriverManager {
 		// Mobile Browser class
 		driverMap.put(TestBedType.Android.toString(), AndroidDriver.class);
 		driverMap.put(TestBedType.AndroidBrowser.toString(), AndroidDriver.class);
+		driverMap.put(TestBedType.AndroidChrome.toString(), AndroidDriver.class);
+		driverMap.put(TestBedType.AndroidNative.toString(), AndroidDriver.class);
+		driverMap.put(TestBedType.AndroidHybridApp.toString(), AndroidDriver.class);
 		driverMap.put(TestBedType.iPhoneNativeSim.toString(), IOSDriver.class);
 		driverMap.put(TestBedType.iPhoneNative.toString(), IOSDriver.class);
 		driverMap.put(TestBedType.iPadNative.toString(), IOSDriver.class);

@@ -5,9 +5,11 @@ package com.etouch.taf.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -16,6 +18,8 @@ import org.testng.ISuiteListener;
 import org.testng.TestNG;
 import org.testng.xml.Parser;
 import org.testng.xml.XmlClass;
+import org.testng.xml.XmlInclude;
+import org.testng.xml.XmlMethodSelector;
 import org.testng.xml.XmlPackage;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
@@ -23,10 +27,13 @@ import org.xml.sax.SAXException;
 
 import com.etouch.taf.core.config.TestBedManagerConfiguration;
 import com.etouch.taf.core.config.TestngConfig;
+import com.etouch.taf.core.config.TestngClass;
 import com.etouch.taf.util.CommonUtil;
 import com.etouch.taf.util.ConfigUtil;
 import com.etouch.taf.util.LogUtil;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 // TODO: Auto-generated Javadoc
 /**
  * The Enum TestSuiteManager.
@@ -60,6 +67,7 @@ public enum TestSuiteManager {
 		List<XmlSuite> existingSuiteList = createTestNGSuite();
 	
 		testng.setXmlSuites(existingSuiteList);
+		CommonUtil.sop(existingSuiteList.get(0).toXml());
 		XmlSuite suite=existingSuiteList.get(0);
 		suite.addListener(testngConfig.getListener());
 		CommonUtil.sop(suite.toXml());
@@ -114,7 +122,7 @@ public enum TestSuiteManager {
 					.getCurrentTestBeds()) {
 	
 				mobileSuiteList.add(createTestSuite(testBedName));
-				List<XmlClass> xmlClasses=createXmlClass(TestBedManagerConfiguration.getInstance().getMobileConfig().getTestClass());
+				List<XmlClass> xmlClasses=createXmlClass(TestBedManagerConfiguration.getInstance().getMobileConfig().getTestngClass() );
 				addTestClasses(mobileSuiteList,xmlClasses);
 				
 			}
@@ -136,7 +144,7 @@ public enum TestSuiteManager {
 					.getCurrentTestBeds()) {
 				
 				webSuiteList.add(createTestSuite(testBedName));		
-				List<XmlClass> xmlClasses=createXmlClass(TestBedManagerConfiguration.getInstance().getWebConfig().getTestClass());
+				List<XmlClass> xmlClasses=createXmlClass(TestBedManagerConfiguration.getInstance().getWebConfig().getTestngClass());
 				addTestClasses(webSuiteList,xmlClasses);
 				}
 		
@@ -177,6 +185,8 @@ public enum TestSuiteManager {
 		
 	}
 	
+	
+	
 	/**
 	 * Helps to create the structure of Test Suite information
 	 * Helper method.
@@ -190,11 +200,13 @@ public enum TestSuiteManager {
 		Map<String, String> paramsMap = new HashMap<String, String>();
 
 		testSuite.setName(testBedName + " Suite");
-		testSuite.setParallel("false");
 		testSuite.setPreserveOrder("true");
 
 		paramsMap.put("testBedName", testBedName);
 		testSuite.setParameters(paramsMap);
+		testSuite.setParallel("false");
+		//assignParallelMode(testSuite);
+
 		//addListenerToSuite(testSuite);
 		createXMLTest( testSuite,testBedName);
 		addXmlTestToSuite(testSuite, testBedName);
@@ -205,6 +217,25 @@ public enum TestSuiteManager {
 
 	
 	
+	private XmlSuite assignParallelMode(XmlSuite testSuite) {
+		boolean isParallel=false;
+		String parallelMode = testBedManagerConfig.getTestngConfig().getParallelMode();
+		try{
+		 
+			isParallel = Boolean.parseBoolean(parallelMode);
+		}catch(Exception e){
+			isParallel=false;
+			// if is not a valid boolean value then set the parallel mode to false
+			parallelMode="false";
+		}
+		 
+		 testSuite.setParallel(parallelMode);
+		 
+		 return testSuite;
+		
+	}
+
+
 	/**
 	 * Adds the xml test to suite.
 	 *
@@ -303,7 +334,7 @@ private List<XmlTest> createXMLTest(XmlSuite xmlSuite,List<XmlClass> classes) {
 	 *
 	 * @return the list
 	 */
-	private List<XmlClass> createXmlClass(){
+	/*private List<XmlClass> createXmlClass(){
 		
 	List<XmlClass> classList=new ArrayList<XmlClass>();
 			String[] className = testngConfig.getClassName();
@@ -327,8 +358,95 @@ private List<XmlTest> createXMLTest(XmlSuite xmlSuite,List<XmlClass> classes) {
 				}
 			}
 			return classList;
+	}*/
+	
+	
+	private List<XmlClass> createXmlClass(){
+		List<XmlClass> xmlClassList=new ArrayList<XmlClass>();
+		
+		List<TestngClass> classList=testngConfig.getTestngClass();
+		if(classList!=null){
+		
+			for(TestngClass testngClass:classList){
+				XmlClass xmlClass=new XmlClass();
+				Class<?> clazz=null;
+				try{
+					clazz=Class.forName(testngClass.getClassName());
+				}catch(ClassNotFoundException e){
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					
+				}
+				xmlClass.setClass(clazz);
+				xmlClass.setName(testngClass.getClassName());
+				xmlClass=addMethodIncludes(xmlClass, testngClass.getMethodList());
+
+				xmlClassList.add(xmlClass);
+			}
+		}//end-if
+		return xmlClassList;
 	}
 	
+	private XmlClass addMethodIncludes(XmlClass xmlClass,List<String> methodList){
+		List<XmlInclude> xmlIncludes=new ArrayList<XmlInclude>();
+		XmlInclude include=null;
+		
+		if(methodList==null){
+			// if the methodList is null for a class. 
+			methodList= getTestMethodList(xmlClass.getClass().getName());
+		}
+		
+		if(methodList!=null){
+			for(String methodName:methodList){
+				include=new XmlInclude(methodName);
+				include.setXmlClass(xmlClass);
+				xmlIncludes.add(include);
+			}
+			xmlClass.setIncludedMethods(xmlIncludes);
+		}
+		
+		return xmlClass;
+	}
+	
+	
+	private ArrayList<String> getTestMethodList(String className) {
+		 ArrayList<String> methods = new ArrayList<String>();
+//	    	Reflections reflections = new Reflections(packageName);
+//	    	reflections.get
+	    	Class cls;
+			try {
+				cls = Class.forName(className);
+		    	List<Method> methodList = getMethodsAnnotatedWith(cls,org.testng.annotations.Test.class);
+		    	for (Method m:methodList) {
+		    		methods.add(className+"#"+m.getName());
+		    	}
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    	
+	    	return methods;
+	    }
+	
+	 public static List<Method> getMethodsAnnotatedWith(final Class<?> type, final Class<? extends Annotation> annotation) {
+	        final List<Method> methods = new ArrayList<Method>();
+	        Class<?> klass = type;
+	        while (klass != Object.class) { // need to iterated thought hierarchy in order to retrieve methods from above the current instance
+	            // iterate though the list of methods declared in the class represented by klass variable, and add those annotated with the specified annotation
+	            final List<Method> allMethods = new ArrayList<Method>(Arrays.asList(klass.getDeclaredMethods()));       
+	            for (final Method method : allMethods) {
+	                if (annotation == null || method.isAnnotationPresent(annotation)) {
+	                    // TODO process annotInstance
+	                    methods.add(method);
+	                }
+	            }
+	            // move to the upper class in the hierarchy in search for more methods
+	            klass = klass.getSuperclass();
+	        }
+	        return methods;
+	    }
+
+
 	
 	
 	/**
@@ -337,27 +455,31 @@ private List<XmlTest> createXMLTest(XmlSuite xmlSuite,List<XmlClass> classes) {
 	 * @param className the class name
 	 * @return the list
 	 */
-	private List<XmlClass> createXmlClass(String[] className){
+	private List<XmlClass> createXmlClass(List<TestngClass> classList){
 		
-			List<XmlClass> classList=new ArrayList<XmlClass>();
-
-				// Populate the class Names that need to be tested from TestNG
-				// config.
-				for (String clazzName : className) {
-					
-					XmlClass xmlClass = new XmlClass();
-					Class<?> clazz=null;
-					try {
-						clazz = Class.forName(clazzName);
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					xmlClass.setClass(clazz);
-					xmlClass.setName(clazzName);
-					classList.add(xmlClass);
-				}
-				return classList;
+		List<XmlClass> xmlClassList=null;
+		if(classList!=null && classList.size()>0){
+			xmlClassList=new ArrayList<XmlClass>();
+		
+		for(TestngClass testngClass:classList){
+			XmlClass xmlClass=new XmlClass();
+			Class<?> clazz=null;
+			try{
+				clazz=Class.forName(testngClass.getClassName());
+			}catch(ClassNotFoundException e){
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				
+			}
+			xmlClass.setClass(clazz);
+			xmlClass.setName(testngClass.getClassName());
+			xmlClass=addMethodIncludes(xmlClass, testngClass.getMethodList());
+			
+			xmlClassList.add(xmlClass);
+			
+		}
+		}//end-if
+		return xmlClassList;
 		}
 	
 	/**
@@ -470,3 +592,5 @@ private List<XmlTest> createXMLTest(XmlSuite xmlSuite,List<XmlClass> classes) {
 	// }
 
 }
+
+

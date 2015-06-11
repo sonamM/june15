@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javassist.bytecode.Descriptor.Iterator;
-
 import org.apache.commons.logging.Log;
 import org.testng.Assert;
 import org.testng.ITestResult;
@@ -26,8 +24,6 @@ public class SoftAssertor {
 	
 	/** The log. */
 	static Log log=LogUtil.getLog(SoftAssertor.class);
-	
-	static boolean exceptionsThrown = false;
 	
 	/** The verification failures map. */
 	private static Map<ITestResult,List<String>> verificationFailuresMap = new HashMap<ITestResult,List<String>>();
@@ -134,6 +130,7 @@ public class SoftAssertor {
 	
 	/**
 	 * Adds the verification failure.
+	 * This nmethod helps to captures all the errors thrown for a test method.
 	 *
 	 * @param e the e
 	 */
@@ -188,15 +185,43 @@ public class SoftAssertor {
 	}
 	
 	/**
-	 * Display assert errors.
+	 * Display errors.
+	 * This method logs all the errors and fails the test method with the errors captured.
 	 */
-	public static void displayAssertErrors()
+	public static void displayErrors()
 	{
+		String errorsForTest= readErrorsForTest();	
+		refreshVerificationFailures();
+		if(errorsForTest!=null && errorsForTest.length()>0)
+			Assert.fail(errorsForTest);	
+	}
+	
+	
+	/**
+	 * Display errors for test.
+	 *
+	 * @param errors the errors
+	 */
+	public void displayErrorsForTest(String errors)
+	{
+		if(errors!=null && errors.length()>0)
+			Assert.fail(errors);	
+	}
+	
+	
+	/**
+	 * Read errors for test.
+	 *
+	 * @return the string
+	 */
+	public static String readErrorsForTest()
+	{
+		String errMsg = "";
 		if(verificationFailuresMap!=null && verificationFailuresMap.size()>0 )
 		{
 			Set keys = verificationFailuresMap.keySet();
 			java.util.Iterator<ITestResult> itr = keys.iterator();
-			String errMsg = "";
+			
 			while(itr.hasNext())
 			{
 				List<String> errorList = verificationFailuresMap.get(itr.next());
@@ -206,27 +231,21 @@ public class SoftAssertor {
 					{
 						log.error(errorList.get(index));	
 						errMsg = errMsg +  errorList.get(index) + "\n";
-					}
-					
+					}					
 				}
-			}
-			
-			//Assert.fail("Exception during execution of Test methods");
-			//This boolean variable is set to true when there are exceptions found in any test method.
-			exceptionsThrown = true;
-			refreshVerificationFailures();
-			Assert.fail(errMsg);
-			
-			
-		}
-		else if(exceptionsThrown)
-			Assert.fail("Exception during execution of Test methods");
+			}	
+		}	
 		
+		return errMsg;
 	}
+	
 
+	/**
+	 * Refresh verification failures.
+	 */
 	private static void refreshVerificationFailures() {
 		//List<String> verificationFailures = new ArrayList<String>();
-		verificationFailuresMap = new HashMap<ITestResult,List<String>>();
+		verificationFailuresMap = new HashMap<ITestResult,List<String>>();		
 		//verificationFailuresMap.put(Reporter.getCurrentTestResult(), verificationFailures);
 		
 	}

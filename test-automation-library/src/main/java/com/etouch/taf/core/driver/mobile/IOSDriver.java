@@ -40,9 +40,7 @@ public class IOSDriver extends DriverBuilder {
 	 * @throws DriverException the driver exception
 	 */
 	public IOSDriver(TestBed testBed) throws DriverException {
-		super(testBed);
-		buildDriver();
-		// TODO Auto-generated constructor stub
+		super(testBed);		
 	}
 
 	{

@@ -49,8 +49,9 @@ public class PDFCreatorTest {
 	public void setUp()
 	{
 		prop = TafTestUtil.loadProps(TafTestUtil.propFilePath);
-		resultPDF = prop.getProperty("resultPDfPath");
+		//resultPDF = prop.getProperty("resultPDfPath");
 		imgSource = prop.getProperty("imageSource");
+		resultPDF = imgSource + "image_types.pdf";
 	}
 
 	@Test

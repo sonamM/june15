@@ -6,10 +6,14 @@ package com.etouch.taf.webui.selenium;
 import org.apache.commons.logging.Log;
 import org.openqa.selenium.WebElement;
 
+import com.etouch.taf.core.TestBedManager;
+import com.etouch.taf.core.config.TestBedManagerConfiguration;
 import com.etouch.taf.core.exception.PageException;
 import com.etouch.taf.core.resources.ObjectType;
+import com.etouch.taf.core.resources.TestTypes;
 import com.etouch.taf.util.CommonUtil;
 import com.etouch.taf.util.LogUtil;
+import com.etouch.taf.webui.ITafElement;
 import com.etouch.taf.webui.selenium.webelement.Button;
 import com.etouch.taf.webui.selenium.webelement.CheckBox;
 import com.etouch.taf.webui.selenium.webelement.Element;
@@ -20,6 +24,7 @@ import com.etouch.taf.webui.selenium.webelement.SelectBox;
 import com.etouch.taf.webui.selenium.webelement.Text;
 import com.etouch.taf.webui.selenium.webelement.TextBox;
 import com.etouch.taf.webui.selenium.webelement.Video;
+import com.etouch.taf.webui.qtp.QTPElement;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -31,6 +36,13 @@ import com.etouch.taf.webui.selenium.webelement.Video;
  */
 public class PageObjectFactory {
 	
+	/**
+	 * Instantiates a new page object factory.
+	 */
+	PageObjectFactory(){
+		
+	}
+	
 	/** The log. */
 	static Log log = LogUtil.getLog(PageObjectFactory.class);
 	
@@ -41,8 +53,8 @@ public class PageObjectFactory {
 	 * @return page element instance based on page object type.
 	 * @throws PageException on error in creating page object.
 	 */
-	
-	public static Element createPageObject (WebElement webElement,String type) throws PageException{
+	@Deprecated
+	public static Element createCustomPageObject (WebElement webElement,String type) throws PageException{
 		
 		if(CommonUtil.isNull(webElement) || CommonUtil.isNull(type)){
 			log.error("Falied to create object, target element or page object type is missing (" + webElement + "," + type +")");			
@@ -71,5 +83,17 @@ public class PageObjectFactory {
 		}else{
 			throw new PageException("No such object exist");
 		}
-	}
+	}	
+	
+
+/*public static TafElement createPageObject (org.openqa.selenium.WebElement webElement, String testType) throws PageException{
+	
+	//string[] testTypes = TestBedManagerConfiguration.INSTANCE.getTestTypes();
+	if(CommonUtil.isNull(webElement) || CommonUtil.isNull(testType)){
+		log.error("Falied to create object, target element or page object type is missing (" + webElement + "," + testType +")");			
+		throw new PageException("Falied to create object, target element or page object type is missing");
+	}		
+
+	return new QTPElement(webElement);
+}*/
 }	

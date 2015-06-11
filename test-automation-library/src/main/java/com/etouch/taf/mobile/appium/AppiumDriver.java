@@ -155,8 +155,11 @@ public class AppiumDriver {
 	 * @return the desired capabilities
 	 */
 	private static DesiredCapabilities createAndroidDriver(TestBed testBed) {
+		
 		DesiredCapabilities capabilities=new DesiredCapabilities();
 		
+		//Added for Android web testing
+		capabilities.setCapability(TafCapabilityType.BROWSER_NAME, testBed.getBrowser().getName());
 		capabilities.setCapability(TafCapabilityType.VERSION, testBed.getBrowser().getVersion());
 		capabilities.setCapability(TafCapabilityType.ACCEPT_SSL_CERTS, true);
 		

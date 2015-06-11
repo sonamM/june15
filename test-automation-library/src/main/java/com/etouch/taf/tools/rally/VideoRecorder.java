@@ -141,45 +141,55 @@ public class VideoRecorder {
    	
    	public String getVideoLink()
    	{
-   		String videoFileName = pickLatestVideoFile(videoPath).getName();
+   		String videoFileName = null;
+   		File videoFile = pickLatestVideoFile(videoPath);
+   		if(videoFile!=null)
+   			videoFileName = videoFile.getName();
    		String videoLink = "http://localhost:8080/" + videoFileName ;
    		return videoLink;
    	}
    	
     
-		private File pickLatestVideoFile(String videoPath2) {
+	private File pickLatestVideoFile(String videoPath2) {
 			File directory = new File(videoPath);
 			File[] files = directory.listFiles();
-
-			Arrays.sort(files, new Comparator<File>(){
-			    public int compare(File f1, File f2)
-			    {
-			        return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
-			    } });
-			return files[files.length-1];
+			
+			File fileToReturn = null;
+			
+			if(files!=null && files.length>0)
+			{
+				Arrays.sort(files, new Comparator<File>(){
+				    public int compare(File f1, File f2)
+				    {
+				        return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
+				    } });
+				fileToReturn = files[files.length-1];
+			}
+			
+			return fileToReturn;
 	}
 
-		/**
-		 * Creates the screenshot.
-		 *
-		 * @param imagePath the image path
-		 * @param imgName the img name
-		 * @return the screenshot
-		 */
-		public void createScreenshot(String imagePath, String imgName) {
-			try{
-			       // Thread.sleep(10000);
-			        BufferedImage image = new Robot().createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
-			        ImageIO.write(image, "jpg", new File(imagePath + File.separator + imgName + ".png"));
-			       // ImageIO.write(image, "jpg", new File("..\\AmazonPOC\\src\\test\\resources\\testdata\\screenshots\\sample2.png"));
-				      
-		    	}catch(IOException e){
-		    		log.error(e.getMessage());
-		    		
-		        }catch(AWTException e){
-		        	log.error(e.getMessage());		     	   	
-		        }
-		    }  	
+	/**
+	 * Creates the screenshot.
+	 *
+	 * @param imagePath the image path
+	 * @param imgName the img name
+	 * @return the screenshot
+	 */
+	public void createScreenshot(String imagePath, String imgName) {
+		try{
+		       // Thread.sleep(10000);
+		        BufferedImage image = new Robot().createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
+		        ImageIO.write(image, "jpg", new File(imagePath + File.separator + imgName + ".png"));
+		       // ImageIO.write(image, "jpg", new File("..\\AmazonPOC\\src\\test\\resources\\testdata\\screenshots\\sample2.png"));
+			      
+	    	}catch(IOException e){
+	    		log.error(e.getMessage());
+	    		
+	        }catch(AWTException e){
+	        	log.error(e.getMessage());		     	   	
+	        }
+	    }  	
    	
 
 }

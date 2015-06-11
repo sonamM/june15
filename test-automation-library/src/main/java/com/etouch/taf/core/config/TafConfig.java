@@ -29,8 +29,7 @@ public abstract class TafConfig {
 	/** The test env. */
 	private String testEnv;
 	
-	/**  The testClass. */
-	private String[] testClass;
+	private List<TestngClass> testngClass;
 	
 	/** The test beds. */
 	private List<TestBedConfig> testBeds;
@@ -143,23 +142,15 @@ public abstract class TafConfig {
 		this.testEnv = testEnv;
 	}
 
-	/**
-	 * Gets the test class.
-	 *
-	 * @return the test class
-	 */
-	public String[] getTestClass() {
-		return testClass;
+	public List<TestngClass> getTestngClass() {
+		return testngClass;
 	}
 
-	/**
-	 * Sets the test class.
-	 *
-	 * @param testClass the new test class
-	 */
-	public void setTestClass(String[] testClass) {
-		this.testClass = testClass;
+	public void setTestngClass(List<TestngClass> testngClass) {
+		this.testngClass = testngClass;
 	}
+
+	
 	
 	
 	

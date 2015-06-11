@@ -68,8 +68,15 @@ public enum TestBedType {
 	Android("Android"),
 	
 	/**  The Android Native Browser. */
-	AndroidBrowser("Android")
-	;
+	AndroidBrowser("AndroidBrowser"),
+	
+	
+	/**  The Android Chrome Browser. */
+	AndroidChrome("AndroidChrome"),
+	
+	
+	/**  The Android Hybrid App */
+	AndroidHybridApp("AndroidHybridApp");
     
 	/** The log. */
 	static Log log = LogUtil.getLog(TestBedType.class);

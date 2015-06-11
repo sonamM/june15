@@ -13,12 +13,14 @@ public class TestngConfig extends TafConfig {
 	
 	/** The listener. */
 	private String listener;
-	
-	/** The class name. */
-	private String[] className;
+		
+	private List<TestngClass> testngClass;
 	
 	/** The reporter. */
 	private String reporter;
+	
+	/** Parallel Mode */
+	private String parallelMode;
 	
 
 	/**
@@ -40,23 +42,7 @@ public class TestngConfig extends TafConfig {
 	}
 	
 	
-	/**
-	 * Sets the class name.
-	 *
-	 * @param className the new class name
-	 */
-	public void setClassName(String[] className) {
-		this.className = className;
-	}
 	
-	/**
-	 * Gets the class name.
-	 *
-	 * @return the class name
-	 */
-	public String[] getClassName() {
-		return className;
-	}
 
 	/**
 	 * Gets the reporter.
@@ -77,5 +63,23 @@ public class TestngConfig extends TafConfig {
 	}
 	
 	
+	
+	
+	public List<TestngClass> getTestngClass() {
+		return testngClass;
+	}
+
+	public void setTestngClass(List<TestngClass> testngClass) {
+		this.testngClass = testngClass;
+	}
+
+	public String getParallelMode() {
+		return parallelMode;
+	}
+
+	public void setParallelMode(String parallelMode) {
+		this.parallelMode = parallelMode;
+	}
+
 	
 }

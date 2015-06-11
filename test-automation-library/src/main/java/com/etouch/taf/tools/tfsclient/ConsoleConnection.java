@@ -103,6 +103,7 @@ public class ConsoleConnection
     	//System.out.println("TFS_JNI_NATIVE path is: " + tfsConfig.);
     	if ( System.getProperty("com.microsoft.tfs.jni.native.base-directory") == null ) {
     		System.setProperty("com.microsoft.tfs.jni.native.base-directory", tfsConfig.getJniNativeBaseDir());
+    		System.out.println(System.getProperty("com.microsoft.tfs.jni.native.base-directory"));
     	}
  
         Credentials credentials;

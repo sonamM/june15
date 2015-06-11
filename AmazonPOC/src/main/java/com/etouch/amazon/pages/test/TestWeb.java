@@ -23,4 +23,9 @@ public class TestWeb {
 		CommonUtil.sop(" Message from TestWeb");
 	}
 
+	
+	@Test
+	public void testOne(){
+		CommonUtil.sop(" Message from TestOne");
+	}
 }

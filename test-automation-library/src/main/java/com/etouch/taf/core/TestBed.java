@@ -50,6 +50,8 @@ public class TestBed {
 		/**  All the App related information(Only for mobile Config) will be configured here. */
 		private AppConfig app;
 		
+		/** The test type. */
+		private String testType;		
 		
 		
 		/**
@@ -176,6 +178,24 @@ public class TestBed {
 		 */
 		public void setApp(AppConfig app) {
 			this.app = app;
+		}
+		
+		/**
+		 * Gets the test type.
+		 *
+		 * @return the test type
+		 */
+		public String getTestType() {
+			return testType;
+		}
+		
+		/**
+		 * Sets the test type.
+		 *
+		 * @param testType the new test type
+		 */
+		public void setTestType(String testType) {
+			this.testType = testType;
 		}
 		
 		

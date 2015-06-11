@@ -27,10 +27,15 @@ import com.etouch.taf.core.config.TestBedConfig;
 import com.etouch.taf.core.config.TestBedManagerConfiguration;
 import com.etouch.taf.core.exception.DefectException;
 import com.etouch.taf.core.exception.DriverException;
+import com.etouch.taf.core.resources.TestTypes;
 import com.etouch.taf.util.CommonUtil;
 import com.etouch.taf.util.ConfigUtil;
 import com.etouch.taf.util.FileUtils;
 import com.etouch.taf.util.LogUtil;
+import com.etouch.taf.webui.ITafElementFactory;
+import com.etouch.taf.webui.MobileElementFactory;
+import com.etouch.taf.webui.TafElementFactoryManager;
+import com.etouch.taf.webui.WebElementFactory;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -106,21 +111,26 @@ public class SuiteListener implements ISuiteListener {
 		
 		TestBed currentTestBed=null;
 		TestBedManagerConfiguration testBedMgrConfig=TestBedManagerConfiguration.getInstance();
+		ITafElementFactory webElementFactory = new WebElementFactory();
+		ITafElementFactory mobileElementFactory = new MobileElementFactory();
+		
 		if(ConfigUtil.isWebTestTypeEnabled()){
+			populateFactoryManager(TestTypes.WEB.getTestType(), webElementFactory);
 			for(TestBedConfig tbConfig:testBedMgrConfig.getWebConfig().getTestBeds()){
 				
 				CommonUtil.sop(" Current TestBedName " + testBedName + "tbConfig TestBedName " +tbConfig.getTestBedName() );
 				if(tbConfig.getTestBedName().equalsIgnoreCase(testBedName)){
-					currentTestBed=copyTestBedDetails(tbConfig);
+					currentTestBed=copyTestBedDetails(tbConfig, TestTypes.WEB.getTestType());
 					break;
 				}
 			}
 		}
 		if(ConfigUtil.isMobileTestTypeEnabled()){
+			populateFactoryManager(TestTypes.MOBILE.getTestType(), mobileElementFactory);
 		if(currentTestBed == null){
 				for(TestBedConfig tbConfig:testBedMgrConfig.getMobileConfig().getTestBeds()){
 					if(tbConfig.getTestBedName().equalsIgnoreCase(testBedName)){
-						currentTestBed=copyTestBedDetails(tbConfig);
+						currentTestBed=copyTestBedDetails(tbConfig, TestTypes.MOBILE.getTestType());
 						break;
 				}
 			}
@@ -128,17 +138,23 @@ public class SuiteListener implements ISuiteListener {
 		}
 		return currentTestBed;
 	}
+    
+    private static void populateFactoryManager(String testType, ITafElementFactory factory)
+    {
+    	TafElementFactoryManager.setFactory(TestTypes.WEB.getTestType(), factory);
+    }
 	
   
     
     
-	/**
+    /**
 	 * Copy test bed details.
 	 *
 	 * @param testBedConfig the test bed config
+	 * @param testType the test type
 	 * @return the test bed
 	 */
-	private static TestBed copyTestBedDetails(TestBedConfig testBedConfig){
+	private static TestBed copyTestBedDetails(TestBedConfig testBedConfig, String testType){
 		TestBed currentTestBed = new TestBed();
 		if(testBedConfig!=null){
 			
@@ -150,6 +166,7 @@ public class SuiteListener implements ISuiteListener {
 			currentTestBed.setDevice(testBedConfig.getDevice());
 			currentTestBed.setTestBedName(testBedConfig.getTestBedName());
 			currentTestBed.setTestbedClassName(testBedConfig.getTestbedClassName());
+			currentTestBed.setTestType(testType);
 
 			
 		}

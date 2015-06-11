@@ -5,9 +5,8 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.Properties;
 
-import junit.framework.Assert;
-
 import org.apache.commons.logging.Log;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,10 +39,10 @@ public class PDFFileReaderTest {
 	public void setUp()
 	{
 		prop = TafTestUtil.loadProps(TafTestUtil.propFilePath);
-		input1 = prop.getProperty("inputPDfPath1");
+		input1 = prop.getProperty("inputPDFPathForText");
 		result1 = prop.getProperty("resultPDFPath1");
-		input2 = prop.getProperty("inputPDfPath2");
-		result2 = prop.getProperty("resultPDfPath2");
+		input2 = prop.getProperty("inputPDFPathForImages");
+		result2 = prop.getProperty("resultImagePath");
 	}
     
 	@Test
@@ -89,6 +88,6 @@ public class PDFFileReaderTest {
 		}
 		
 	}
-	 
+
 
 }

@@ -13,6 +13,7 @@ import static org.monte.media.VideoFormatKeys.CompressorNameKey;
 import static org.monte.media.VideoFormatKeys.DepthKey;
 import static org.monte.media.VideoFormatKeys.ENCODING_AVI_TECHSMITH_SCREEN_CAPTURE;
 import static org.monte.media.VideoFormatKeys.QualityKey;
+import io.appium.java_client.AppiumDriver;
 
 import java.awt.AWTException;
 import java.awt.GraphicsConfiguration;
@@ -289,6 +290,14 @@ public static int getRowNum(XlsxReader xls, String id){
 		                  driverObj.close();
 		                  driverObj.quit();
 		           }             
+		}
+		
+		public static void closeMobileDriver(AppiumDriver driverObj)
+		{
+			if(driverObj!=null)
+			{
+				driverObj.quit();
+			}		
 		}
 	
 		

@@ -4,9 +4,11 @@ import static org.junit.Assert.*;
 
 import java.util.Properties;
 
-import junit.framework.Assert;
+//import junit.framework.Assert;
+
 
 import org.apache.commons.logging.Log;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -63,7 +65,7 @@ public class Xlsx_ReaderTest {
 	public void isDataSet()
 	{
 		   Assert.assertTrue(datatable.setCellData("E1", "Salary", 2, "5000"));
-		   Assert.assertTrue(datatable.setCellData("E1", "Age", 3, "30", prop.getProperty("xlsFilePath")));		   
+		   Assert.assertTrue(datatable.setCellData("E1", "Age", 3, "30", prop.getProperty("hyperLinkURIForXlsx")));		   
 	}
 	
 	@Test

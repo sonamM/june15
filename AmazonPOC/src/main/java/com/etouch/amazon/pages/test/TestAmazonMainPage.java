@@ -12,6 +12,7 @@ import com.etouch.taf.util.CommonUtil;
 import com.etouch.taf.util.DateUtil;
 import com.etouch.taf.util.LogUtil;
 import com.etouch.taf.util.SoftAssertor;
+import com.etouch.taf.util.TestUtil;
 import com.etouch.amazon.common.BaseTest;
 
 import org.monte.screenrecorder.ScreenRecorder;
@@ -97,17 +98,12 @@ public class TestAmazonMainPage extends BaseTest {
 	@BeforeClass
 	public void prepareBeforeClass() throws Exception {
 		try {
+				videoRecorder = new VideoRecorder("..\\AmazonPOC\\src\\test\\resources\\testdata\\videos\\");		
 			
-			webPage = new WebPage();
-			mainPage = new AmazonMainPage(url, webPage);
-			videoRecorder = new VideoRecorder("..\\AmazonPOC\\src\\test\\resources\\testdata\\videos\\");		
-			
-		}
-
-		catch (Exception e) {
-			CommonUtil.sop("errr is " + e);
-			SoftAssertor.addVerificationFailure(e.getMessage());
-		}
+			}catch (Exception e) {
+				CommonUtil.sop("errr is " + e);
+				SoftAssertor.addVerificationFailure(e.getMessage());
+			}
 	}
 
 	/* (non-Javadoc)
@@ -138,7 +134,7 @@ public class TestAmazonMainPage extends BaseTest {
 	/**
 	 * Test pre sign in.
 	 */
-	@Test
+	//@Test
 	//public void testPreSignIn(TestParameters inputs) throws PageException {
 	public void testPreSignIn()	{
 		boolean isRecordingStopped = false;
@@ -160,7 +156,8 @@ public class TestAmazonMainPage extends BaseTest {
 			CommonUtil.sop("this is same for test 1");
 		}
 		
-		//SoftAssertor.assertFail("Failing test method1 for test results");	
+		SoftAssertor.assertFail("Failing test method1 for test results");	
+		//Assert.assertEquals(actualURL, "www.yahoo.com");
 		//SoftAssertor.assertEquals(actualURL, "www.yahoo.com");
 			videoRecorder.stopRecording();
 			videoRecorder.deleteRecording();
@@ -187,12 +184,12 @@ public class TestAmazonMainPage extends BaseTest {
 		{
 			if(!isRecordingStopped)
 				videoRecorder.stopRecording();
-			SoftAssertor.displayAssertErrors();
+			SoftAssertor.displayErrors();
 			
 		}
 	}
 
-	//@Test
+	
 	/**
 	 * Test sign in.
 	 *
@@ -207,84 +204,170 @@ public class TestAmazonMainPage extends BaseTest {
 
 	//public void testSignIn() throws PageException {
 		try {
-			CommonUtil.sop("Starting test case 2");
-			videoRecorder.startRecording();
-			CommonUtil.sop("Recording feature on");
-			
-			String actualURL = "";
-			String expectedURL = "";
-			
-			//CommonUtil.sop("User Name is: " + TestBedManagerConfiguration.INSTANCE.getWebConfig().getUserName());
-			//CommonUtil.sop("Password is: " + TestBedManagerConfiguration.INSTANCE.getWebConfig().getPassword());
-
-			// actualURL =
-			// "https://www.amazon.com/ap/signin?_encoding=UTF8&openid.assoc_handle=usflex&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2Fgp%2Fcss%2Fhomepage.html%3Fie%3DUTF8%26ref_%3Dgno_yam_ya";
-			mainPage.SignIn();
-			CommonUtil.sop("this is here 2");
-			actualURL = webPage.getCurrentUrl();
-			expectedURL = "https://www.amazon.com/gp/yourstore/home?ie=UTF8&ref_=gno_signin&";
-			
-			if (actualURL == "https://www.amazon.com/ap/signin?_encoding=UTF8&openid.assoc_handle=usflex&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2Fgp%2Fyourstore%2Fhome%3Fie%3DUTF8%26ref_%3Dgno_signin");
-			{
+				TestUtil.createDriver(false);
 				
-				CommonUtil.sop("this is same for test 2");
-			}
-			
-			//Assert.assertEquals(actualURL,"https://www.google.com", "URL did not matched");
-			
-			//SoftAssertor.assertEquals(actualURL,"https://www.google.com", "URL did not matched");	
-			//SoftAssertor.assertFail("Failing test method2 for test results");
-			
-			videoRecorder.stopRecording();
-			videoRecorder.deleteRecording();
-			isRecordingStopped = true;
-			CommonUtil.sop("Stopped Recording at the end");
-
-		} catch (AssertionError e) {
-			CommonUtil.sop("the test case 2 failed");
-			
-			String SEARCH_DEFECT_NAME = inputs.getParamMap().get("SearchDefectName");	
-			String SEARCH_TEST_ID =  inputs.getParamMap().get("RallyTestCaseID");
-			String DEFECT_SEVERITY =  inputs.getParamMap().get("DefectSeverity");
-			String DEFECT_NOTES =  inputs.getParamMap().get("DefectNotes")  + "Video Link: "+ videoRecorder.getVideoLink();
-			String attachmentPath = "..\\AmazonPOC\\src\\test\\resources\\testdata\\screenshots";
-			
-			CommonUtil.sop("Defect Notes is: " + DEFECT_NOTES);
-			
-			//mainPage.getScreenshot();
-			videoRecorder.createScreenshot(attachmentPath, "error");
-			
-			mainPage.logAndCreateADefect(TestBedManager.INSTANCE.getDefect(),DEFECT_PROP,SEARCH_TEST_ID, WORKSPACE_ID, PROJECT_ID,  STORY_ID, SEARCH_DEFECT_NAME, DEFECT_SEVERITY,DEFECT_OWNER,DEFECT_NOTES,e.getMessage(), attachmentPath);	
-			
-			//defect logging method for jira
-			//mainPage.logAndCreateADefect(TestBedManager.INSTANCE.getDefect(),url3, issueUrl, username, password,keys);		
-			
-			SoftAssertor.addVerificationFailure(e.getMessage());
-		    e.printStackTrace();
-
-		}
-		catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			SoftAssertor.addVerificationFailure(e.getMessage());
-			e.printStackTrace();
-		}
-		catch(PageException e)
-		{
-			SoftAssertor.addVerificationFailure(e.getMessage());
-			e.printStackTrace();
-		}
-		catch(Exception e)
-		{
-			SoftAssertor.addVerificationFailure(e.getMessage());
-			e.printStackTrace();
-		}
-		finally
-		{	
-			if(!isRecordingStopped)
+				webPage = new WebPage();
+				mainPage = new AmazonMainPage(url, webPage);
+				
+				CommonUtil.sop("Starting test case 2");
+				videoRecorder.startRecording();
+				CommonUtil.sop("Recording feature on");
+				
+				String actualURL = "";
+				String expectedURL = "";
+				
+				mainPage.PreSignIn();
+				mainPage.SignIn();
+				CommonUtil.sop("this is here 2");
+				actualURL = webPage.getCurrentUrl();
+				expectedURL = "https://www.amazon.com/gp/yourstore/home?ie=UTF8&ref_=gno_signin&";
+				
+				if (actualURL == "https://www.amazon.com/ap/signin?_encoding=UTF8&openid.assoc_handle=usflex&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2Fgp%2Fyourstore%2Fhome%3Fie%3DUTF8%26ref_%3Dgno_signin");
+				{
+					
+					CommonUtil.sop("this is same for test 2");
+				}
+				
+				//Assert.assertEquals(actualURL,"https://www.google.com", "URL did not matched");
+				
+				//SoftAssertor.assertEquals(actualURL,"https://www.google.com", "URL did not matched");	
+				//SoftAssertor.assertFail("Failing test method2 for test results");
+				
 				videoRecorder.stopRecording();
-			SoftAssertor.displayAssertErrors();
-		}
+				videoRecorder.deleteRecording();
+				isRecordingStopped = true;
+				CommonUtil.sop("Stopped Recording at the end");
 
+			} catch (AssertionError e) {
+				CommonUtil.sop("the test case 2 failed");				
+				SoftAssertor.addVerificationFailure(e.getMessage());
+			    e.printStackTrace();
+	
+			}
+			catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				SoftAssertor.addVerificationFailure(e.getMessage());
+				e.printStackTrace();
+			}
+			catch(PageException e)
+			{
+				SoftAssertor.addVerificationFailure(e.getMessage());
+				e.printStackTrace();
+			}
+			catch(Exception e)
+			{
+				SoftAssertor.addVerificationFailure(e.getMessage());
+				e.printStackTrace();
+			}
+			finally
+			{	
+				TestUtil.closeDriver((WebDriver)TestBedManager.INSTANCE.getCurrentTestBed().getDriver());
+				if(!isRecordingStopped)
+					videoRecorder.stopRecording();	
+				String errors = SoftAssertor.readErrorsForTest();
+				if(errors!=null && errors.length()>0)
+					//logDefect(inputs, errors);
+				SoftAssertor.displayErrors();
+			}
+
+	}
+	
+	/**
+	 * Test sign in.
+	 *
+	 * @param inputs the inputs
+	 * @throws PageException the page exception
+	 */
+	@Test(dataProvider = "tafDataProvider", dataProviderClass = TafExcelDataProvider.class, priority = 2)
+	@ITafExcelDataProviderInputs(excelFile = "file1", excelsheet = "AMAZON", dataKey = "AuthenticationFail")
+	public void testSignInWithITafElement(TestParameters inputs){
+		
+		boolean isRecordingStopped = false;
+		
+		try {
+				TestUtil.createDriver(true);
+				
+				webPage = new WebPage();
+				mainPage = new AmazonMainPage(url, webPage);
+				
+				CommonUtil.sop("Starting test case 2");
+				videoRecorder.startRecording();
+				CommonUtil.sop("Recording feature on");
+				
+				String actualURL = "";
+				String expectedURL = "";
+				
+				mainPage.PreSignInWithITafElement();
+				mainPage.SignInWithITafElement();;
+				CommonUtil.sop("this is here 2");
+				actualURL = webPage.getCurrentUrl();
+				expectedURL = "https://www.amazon.com/gp/yourstore/home?ie=UTF8&ref_=gno_signin&";
+				
+				if (actualURL == "https://www.amazon.com/ap/signin?_encoding=UTF8&openid.assoc_handle=usflex&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2Fgp%2Fyourstore%2Fhome%3Fie%3DUTF8%26ref_%3Dgno_signin");
+				{
+					
+					CommonUtil.sop("this is same for test 2");
+				}
+				
+				//SoftAssertor.assertEquals(actualURL,"https://www.google.com", "URL did not matched");			
+				
+				videoRecorder.stopRecording();
+				videoRecorder.deleteRecording();
+				isRecordingStopped = true;
+				CommonUtil.sop("Stopped Recording at the end");
+	
+			} catch (AssertionError e) {
+				CommonUtil.sop("the test case 2 failed");				
+				SoftAssertor.addVerificationFailure(e.getMessage());
+			    e.printStackTrace();
+	
+			}
+			catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				SoftAssertor.addVerificationFailure(e.getMessage());
+				e.printStackTrace();
+			}
+			catch(PageException e)
+			{
+				SoftAssertor.addVerificationFailure(e.getMessage());
+				e.printStackTrace();
+			}
+			catch(Exception e)
+			{
+				SoftAssertor.addVerificationFailure(e.getMessage());
+				e.printStackTrace();
+			}
+			finally
+			{	
+				TestUtil.closeDriver((WebDriver)TestBedManager.INSTANCE.getCurrentTestBed().getDriver());
+				if(!isRecordingStopped)
+					videoRecorder.stopRecording();	
+				String errors = SoftAssertor.readErrorsForTest();
+				if(errors!=null && errors.length()>0)
+					//logDefect(inputs, errors);
+				SoftAssertor.displayErrors();
+			}
+
+	}
+
+	
+	public void logDefect(TestParameters inputs, String errMsg)
+	{
+		String SEARCH_DEFECT_NAME = inputs.getParamMap().get("SearchDefectName");	
+		String SEARCH_TEST_ID =  inputs.getParamMap().get("RallyTestCaseID");
+		String DEFECT_SEVERITY =  inputs.getParamMap().get("DefectSeverity");
+		String DEFECT_NOTES =  inputs.getParamMap().get("DefectNotes")  + "Video Link: "+ videoRecorder.getVideoLink();
+		String attachmentPath = "..\\AmazonPOC\\src\\test\\resources\\testdata\\screenshots";
+		//String errMsg = SoftAssertor.readErrorsForTest();
+		
+		CommonUtil.sop("Defect Notes is: " + DEFECT_NOTES);
+		
+		//mainPage.getScreenshot();
+		videoRecorder.createScreenshot(attachmentPath, "error");
+		
+		mainPage.logAndCreateADefect(TestBedManager.INSTANCE.getDefect(),DEFECT_PROP,SEARCH_TEST_ID, WORKSPACE_ID, PROJECT_ID,  STORY_ID, SEARCH_DEFECT_NAME, DEFECT_SEVERITY,DEFECT_OWNER,DEFECT_NOTES, errMsg, attachmentPath);
+		//defect logging method for jira
+		//mainPage.logAndCreateADefect(TestBedManager.INSTANCE.getDefect(),url3, issueUrl, username, password,keys);
 	}
 
 }
